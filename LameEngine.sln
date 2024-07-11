@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LameEngine", "LameEngine\LameEngine.csproj", "{8CF2B765-A031-48D7-8E93-E85F703E465F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame", "TestGame\TestGame.csproj", "{56778354-B37E-4145-9DE5-9B26C583B87F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8CF2B765-A031-48D7-8E93-E85F703E465F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CF2B765-A031-48D7-8E93-E85F703E465F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CF2B765-A031-48D7-8E93-E85F703E465F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CF2B765-A031-48D7-8E93-E85F703E465F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56778354-B37E-4145-9DE5-9B26C583B87F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56778354-B37E-4145-9DE5-9B26C583B87F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56778354-B37E-4145-9DE5-9B26C583B87F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56778354-B37E-4145-9DE5-9B26C583B87F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
