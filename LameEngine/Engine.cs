@@ -29,12 +29,12 @@ public static class Engine
         gameObjects.Add(pGameObject);        
     }
 
-    private static void InternalLoad()
+    internal static void InternalLoad()
     {
         gameTemplate.Load();
     }
 
-    private static void InternalUpdate()
+    internal static void InternalUpdate()
     {
         foreach (GameObject gameObject in gameObjects)
         {
@@ -44,7 +44,7 @@ public static class Engine
         gameTemplate.Update();
     }
 
-    private static void InternalRender()
+    internal static void InternalRender()
     {
         WindowManager.GL.ClearColor(0.39f, 0.58f, 0.93f, 1.0f);
         WindowManager.GL.Clear(ClearBufferMask.ColorBufferBit);
@@ -57,7 +57,7 @@ public static class Engine
         gameTemplate.Render();
     }
 
-    private static void InternalClosing(CancelEventArgs pCancelEventArgs)
+    internal static void InternalClosing(CancelEventArgs pCancelEventArgs)
     {
         gameTemplate.Close();
     }

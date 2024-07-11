@@ -7,14 +7,22 @@ public abstract class Component
         return GetType().GetHashCode();
     }
 
-    public virtual void Update()
+    protected virtual void Update()
     {
-        
     }
 
-    public virtual void Render()
+    protected virtual void Render()
     {
-        
+    }
+
+    internal void InternalUpdate()
+    {
+        Update();
+    }
+
+    internal void InternalRender()
+    {
+        Render();
     }
 
     public static bool operator ==(Component pFirst, Component pSecond)

@@ -12,13 +12,10 @@
       <PackageReference Include="StbImageSharp" Version="2.27.14" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Update="Resources\Shaders\Rectangle.frag">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Resources\Shaders\Rectangle.vert">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+   <ItemGroup>
+    <Content Include="Resources/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

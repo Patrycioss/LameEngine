@@ -40,7 +40,7 @@ public class GameObject
 
     public void RemoveComponent<T>() where T : Component
     {
-        components.RemoveWhere(component => component is T);
+        components.RemoveWhere(pComponent => pComponent is T);
     }
 
     public void RemoveComponent<T>(T pComponent) where T : Component
@@ -50,14 +50,14 @@ public class GameObject
 
     public T? GetComponent<T>() where T : Component
     {
-        Component a =  components.FirstOrDefault(component => component is T);
+        Component a =  components.FirstOrDefault(pComponent => pComponent is T);
         return (T) a;
     }
 
-    public bool TryGetComponent<T>(out T? component) where T : Component
+    public bool TryGetComponent<T>(out T? pComponent) where T : Component
     {
-        Component found =  components.FirstOrDefault(component => component is T);
-        component = (T) found;
+        Component found =  components.FirstOrDefault(pComponent => pComponent is T);
+        pComponent = (T) found;
         return found != null;
     }
     
@@ -71,21 +71,21 @@ public class GameObject
         
     }
 
-    public void InternalUpdate()
+    internal void InternalUpdate()
     {
         foreach (Component component in components)
         {
-            component.Update();
+            component.InternalUpdate();
         }
         
         Update();
     }
 
-    public void InternalRender()
+    internal void InternalRender()
     {
         foreach (Component component in components)
         {
-            component.Render();
+            component.InternalRender();
         }
         
         Render();

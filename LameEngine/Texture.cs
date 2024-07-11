@@ -8,26 +8,16 @@ public class Texture
     public struct Settings()
     {
         public int LevelOfDetail = 0;
-
-        // public TextureWrapMode WrapSMode = TextureWrapMode.Repeat;
-        // public TextureWrapMode WrapTMode = TextureWrapMode.Repeat;
         public TextureWrapMode WrapSMode = TextureWrapMode.Repeat;
         public TextureWrapMode WrapTMode = TextureWrapMode.Repeat;
-
         public Color BorderColor = Color.Black;
-
-        // public TextureMinFilter MinFilter = TextureMinFilter.Nearest;
-        // public TextureMagFilter MagFilter = TextureMagFilter.Linear;
-        // public TextureMinFilter MipMapMinFilter = TextureMinFilter.LinearMipmapLinear;
-        // public TextureMagFilter MipMapMagFilter = TextureMagFilter.Linear;
-
         public TextureMinFilter MinFilter = TextureMinFilter.Nearest;
         public TextureMagFilter MagFilter = TextureMagFilter.Linear;
         public TextureMinFilter MipMapMinFilter = TextureMinFilter.LinearMipmapLinear;
         public TextureMagFilter MipMapMagFilter = TextureMagFilter.Linear;
     }
 
-    private uint handle;
+    private readonly uint handle;
     private static GL GL = WindowManager.GL;
 
 

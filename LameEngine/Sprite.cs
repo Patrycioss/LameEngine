@@ -9,7 +9,7 @@ public struct SpriteSettings()
 public class Sprite : Component
 {
     public readonly SpriteSettings Settings;
-    
+
     private readonly Texture texture;
 
     public Sprite(string pPath)
@@ -24,7 +24,7 @@ public class Sprite : Component
         texture = AssetManager.LoadTexture(pPath, Settings.TextureSettings);
     }
 
-    public override void Render()
+    protected override void Render()
     {
         Rectangle.Draw(texture, Settings.Color);
     }

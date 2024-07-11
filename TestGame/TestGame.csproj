@@ -11,10 +11,11 @@
       <ProjectReference Include="..\LameEngine\LameEngine.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Update="Resources\Sprites\awesomeface.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
+	
+  <ItemGroup>
+    <Content Include="Resources/**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
 </Project>

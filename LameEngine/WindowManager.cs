@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Silk.NET.Input;
+﻿using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using static Silk.NET.Windowing.Window;

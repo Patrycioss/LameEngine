@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using Silk.NET.SDL;
 
 namespace LameEngine;
 
@@ -13,23 +12,23 @@ public class ShaderProgram : IDisposable
     public ShaderProgram(string pVertexPath, string pFragmentPath)
     {
         GL GL = WindowManager.GL;
-        
+
         string vertexSource = File.ReadAllText(pVertexPath);
         string fragmentSource = File.ReadAllText(pFragmentPath);
 
         uint vertexShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertexShader, vertexSource);
-        
+
         uint fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, fragmentSource);
-        
+
         GL.CompileShader(vertexShader);
-        
+
         {
             string info = GL.GetShaderInfoLog(vertexShader);
             Console.WriteLine(info);
         }
-        
+
         GL.CompileShader(fragmentShader);
 
         {
@@ -38,10 +37,10 @@ public class ShaderProgram : IDisposable
         }
 
         handle = GL.CreateProgram();
-        
+
         GL.AttachShader(handle, vertexShader);
         GL.AttachShader(handle, fragmentShader);
-        
+
         GL.LinkProgram(handle);
 
         {
@@ -49,7 +48,7 @@ public class ShaderProgram : IDisposable
             Console.WriteLine(info);
         }
 
-        GL.DetachShader(handle,  vertexShader);
+        GL.DetachShader(handle, vertexShader);
         GL.DetachShader(handle, fragmentShader);
         GL.DeleteShader(fragmentShader);
         GL.DeleteShader(vertexShader);
@@ -67,17 +66,18 @@ public class ShaderProgram : IDisposable
             WindowManager.GL.DeleteProgram(handle);
             disposedValue = true;
         }
+
         GC.SuppressFinalize(this);
     }
-    
+
     ~ShaderProgram()
     {
         if (!disposedValue)
         {
             Console.WriteLine($"GPU Resource leak! Did you forget to call Dispose()?");
-        }   
+        }
     }
-    
+
 
     public void SetColor(string pName, Color pColor)
     {
@@ -90,7 +90,7 @@ public class ShaderProgram : IDisposable
         {
             return pValue;
         }
-        
+
         int value = WindowManager.GL.GetUniformLocation(handle, pName);
         if (value == -1)
         {
@@ -99,5 +99,4 @@ public class ShaderProgram : IDisposable
 
         return value;
     }
-
 }
