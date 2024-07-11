@@ -1,38 +1,28 @@
 ﻿using System.ComponentModel;
-using System.Reflection;
-using OpenTK.Graphics.OpenGL.Compatibility;
-using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
+using Silk.NET.OpenGL;
 
 namespace LameEngine;
 
 public static class Engine
 {
+    // public static MyWindow MainMyWindow { get; private set; }
+
     private static GameTemplate gameTemplate;
-    private static Window window;
-    private static NativeWindowSettings nativeWindowSettings;
+    // private static NativeWindowSettings nativeWindowSettings;
 
     private static readonly List<GameObject> gameObjects = new List<GameObject>();
 
-    public static void Initialize()
-    {
-        nativeWindowSettings = new NativeWindowSettings
-        {
-            ClientSize = new Vector2i(500, 500),
-            Title = "My Game Window",
-        };
-        
-        window = new Window(GameWindowSettings.Default, nativeWindowSettings);
-    }
-    
-    public static void Run(GameTemplate pGameTemplate)
-    {
-        gameTemplate = pGameTemplate;
-        
-        
-        window.Run();
-    }
+
+    // public static void Initialize(WindowSettings pMainWindowSettings)
+    // {
+    //     WindowManager.CreateMainWindow(pMainWindowSettings);
+    // }
+    //
+    // public static void Run(GameTemplate pGameTemplate)
+    // {
+    //     gameTemplate = pGameTemplate;
+    //     WindowManager.Run();
+    // }
 
     private static void RegisterObject(GameObject pGameObject)
     {
@@ -44,7 +34,7 @@ public static class Engine
         gameTemplate.Load();
     }
 
-    private static void InternalUpdate(FrameEventArgs pEventArgs)
+    private static void InternalUpdate()
     {
         foreach (GameObject gameObject in gameObjects)
         {
@@ -54,10 +44,10 @@ public static class Engine
         gameTemplate.Update();
     }
 
-    private static void InternalRender(FrameEventArgs pEventArgs)
+    private static void InternalRender()
     {
-        GL.ClearColor(0.39f, 0.58f, 0.93f, 1.0f);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        WindowManager.GL.ClearColor(0.39f, 0.58f, 0.93f, 1.0f);
+        WindowManager.GL.Clear(ClearBufferMask.ColorBufferBit);
 
         foreach (GameObject gameObject in gameObjects)
         {

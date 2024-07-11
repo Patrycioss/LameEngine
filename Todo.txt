@@ -1,0 +1,1 @@
+Make component not abstract and give it a protected constructor

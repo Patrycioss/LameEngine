@@ -1,16 +1,17 @@
-﻿using OpenTK.Graphics.OpenGL.Compatibility;
-using OpenTK.Mathematics;
+﻿using Silk.NET.OpenGL;
 
 namespace LameEngine;
 
 public static class Rectangle
 {
-    private static readonly int VAO;
-    private static readonly Shader shader;
+    private static uint vao;
+    private static ShaderProgram shaderProgram;
 
-    static Rectangle()
+    private static GL GL = WindowManager.GL;
+
+    public static void Initialize()
     {
-        shader = new Shader("Resources/Shaders/Rectangle.vert", "Resources/Shaders/Rectangle.frag");
+        shaderProgram = new ShaderProgram("Resources/Shaders/Rectangle.vert", "Resources/Shaders/Rectangle.frag");
 
         float[] vertices =
         {
@@ -21,24 +22,23 @@ public static class Rectangle
 
             -0.5f, 0.5f, 0.0f, 1.0f,
             0.5f, 0.5f, 1.0f, 1.0f,
-            0.5f, -0.5f, 1.0f, 0.0f
+            0.5f, -0.5f, 1.0f, 0.0f,
         };
 
 
-        int VBO;
-        GL.GenBuffer(out VBO);
-        GL.GenVertexArray(out VAO);
+        uint vbo = GL.GenBuffer();
+        vao = GL.GenVertexArray();
 
-        GL.BindVertexArray(VAO);
+        GL.BindVertexArray(vao);
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 
+        Span<float> v = new Span<float>(vertices);
 
-        Span<float> span = vertices;
-        GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
         GL.BufferData(
-            BufferTarget.ArrayBuffer,
-            vertices.Length * sizeof(float),
-            span.GetPinnableReference(),
-            BufferUsage.StaticDraw
+            BufferTargetARB.ArrayBuffer,
+            (uint)vertices.Length * sizeof(float),
+            v.GetPinnableReference(),
+            BufferUsageARB.StaticDraw
         );
 
         GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
@@ -48,35 +48,35 @@ public static class Rectangle
         GL.EnableVertexAttribArray(1);
 
         GL.BindVertexArray(0);
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
     }
 
-    public static void Draw(Color4<Rgba> pColour)
+    public static void Draw(Color pColor)
     {
-        shader.Use();
-        shader.SetColor("spriteColor",pColour);
-        InternalDraw(pColour);
+        shaderProgram.Use();
+        shaderProgram.SetColor("spriteColor", pColor);
+        InternalDraw(pColor);
     }
 
     public static void Draw(Texture pTexture)
     {
-        shader.Use();
+        shaderProgram.Use();
         pTexture.Use();
-        InternalDraw(Color4.White);
-    }
-    
-    public static void Draw(Texture pTexture, Color4<Rgba> pColour)
-    {
-        shader.Use();
-        pTexture.Use();
-        InternalDraw(pColour);
+        InternalDraw(Color.White);
     }
 
-    private static void InternalDraw(Color4<Rgba> pColour)
+    public static void Draw(Texture pTexture, Color pColor)
     {
-        shader.SetColor("spriteColor",pColour);
+        shaderProgram.Use();
+        pTexture.Use();
+        InternalDraw(pColor);
+    }
 
-        GL.BindVertexArray(VAO);
+    private static void InternalDraw(Color pColor)
+    {
+        shaderProgram.SetColor("spriteColor", pColor);
+
+        GL.BindVertexArray(vao);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
         GL.UseProgram(0);
     }

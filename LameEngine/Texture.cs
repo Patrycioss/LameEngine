@@ -1,5 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+﻿using Silk.NET.OpenGL;
 using StbImageSharp;
 
 namespace LameEngine;
@@ -9,16 +8,27 @@ public class Texture
     public struct Settings()
     {
         public int LevelOfDetail = 0;
+
+        // public TextureWrapMode WrapSMode = TextureWrapMode.Repeat;
+        // public TextureWrapMode WrapTMode = TextureWrapMode.Repeat;
         public TextureWrapMode WrapSMode = TextureWrapMode.Repeat;
         public TextureWrapMode WrapTMode = TextureWrapMode.Repeat;
-        public Color4<Rgba> BorderColor = Color4.Black;
+
+        public Color BorderColor = Color.Black;
+
+        // public TextureMinFilter MinFilter = TextureMinFilter.Nearest;
+        // public TextureMagFilter MagFilter = TextureMagFilter.Linear;
+        // public TextureMinFilter MipMapMinFilter = TextureMinFilter.LinearMipmapLinear;
+        // public TextureMagFilter MipMapMagFilter = TextureMagFilter.Linear;
+
         public TextureMinFilter MinFilter = TextureMinFilter.Nearest;
         public TextureMagFilter MagFilter = TextureMagFilter.Linear;
         public TextureMinFilter MipMapMinFilter = TextureMinFilter.LinearMipmapLinear;
         public TextureMagFilter MipMapMagFilter = TextureMagFilter.Linear;
     }
 
-    private int handle;
+    private uint handle;
+    private static GL GL = WindowManager.GL;
 
 
     static Texture()
@@ -33,43 +43,45 @@ public class Texture
         Use();
 
         // Texture wrapping
-        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, (int)pSettings.WrapSMode);
-        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int)pSettings.WrapTMode);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)pSettings.WrapSMode);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)pSettings.WrapTMode);
 
         // Texture filtering
-        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)pSettings.MinFilter);
-        GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)pSettings.MagFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)pSettings.MinFilter);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)pSettings.MagFilter);
 
         ImageResult image = ImageResult.FromStream(File.OpenRead(pImagePath), ColorComponents.RedGreenBlueAlpha);
+        Span<byte> data = new Span<byte>(image.Data);
 
         GL.TexImage2D(
-            TextureTarget.Texture2d,
+            TextureTarget.Texture2D,
             pSettings.LevelOfDetail,
             InternalFormat.Rgba,
-            image.Width,
-            image.Height,
+            (uint)image.Width,
+            (uint)image.Height,
             0,
             PixelFormat.Rgba,
             PixelType.UnsignedByte,
-            image.Data
+            data.GetPinnableReference()
         );
 
-        GL.TexParameteri(
-            TextureTarget.Texture2d,
+        GL.TexParameter(
+            TextureTarget.Texture2D,
             TextureParameterName.TextureMinFilter,
             (int)pSettings.MipMapMinFilter
         );
-        GL.TexParameteri(
-            TextureTarget.Texture2d,
+        
+        GL.TexParameter(
+            TextureTarget.Texture2D,
             TextureParameterName.TextureMagFilter,
             (int)pSettings.MipMapMagFilter
         );
-
-        GL.GenerateMipmap(TextureTarget.Texture2d);
+   
+        GL.GenerateMipmap(TextureTarget.Texture2D);
     }
 
     public void Use()
     {
-        GL.BindTexture(TextureTarget.Texture2d, handle);
+        GL.BindTexture(TextureTarget.Texture2D, handle);
     }
 }

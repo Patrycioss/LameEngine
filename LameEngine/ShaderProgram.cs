@@ -1,36 +1,39 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+﻿using Silk.NET.OpenGL;
+using Silk.NET.SDL;
 
 namespace LameEngine;
 
-public class Shader : IDisposable
+public class ShaderProgram : IDisposable
 {
-    private readonly int handle;
+    private readonly uint handle;
     private bool disposedValue = false;
     private readonly Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
 
-    public Shader(string pVertexPath, string pFragmentPath)
+
+    public ShaderProgram(string pVertexPath, string pFragmentPath)
     {
+        GL GL = WindowManager.GL;
+        
         string vertexSource = File.ReadAllText(pVertexPath);
         string fragmentSource = File.ReadAllText(pFragmentPath);
 
-        int vertexShader = GL.CreateShader(ShaderType.VertexShader);
+        uint vertexShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertexShader, vertexSource);
         
-        int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+        uint fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, fragmentSource);
         
         GL.CompileShader(vertexShader);
-
+        
         {
-            GL.GetShaderInfoLog(vertexShader, out string info);
+            string info = GL.GetShaderInfoLog(vertexShader);
             Console.WriteLine(info);
         }
         
         GL.CompileShader(fragmentShader);
 
         {
-            GL.GetShaderInfoLog(fragmentShader, out string info);
+            string info = GL.GetShaderInfoLog(fragmentShader);
             Console.WriteLine(info);
         }
 
@@ -42,7 +45,7 @@ public class Shader : IDisposable
         GL.LinkProgram(handle);
 
         {
-            GL.GetProgramInfoLog(handle, out string info);
+            string info = GL.GetProgramInfoLog(handle);
             Console.WriteLine(info);
         }
 
@@ -54,20 +57,20 @@ public class Shader : IDisposable
 
     public void Use()
     {
-        GL.UseProgram(handle);
+        WindowManager.GL.UseProgram(handle);
     }
 
     public void Dispose()
     {
         if (!disposedValue)
         {
-            GL.DeleteProgram(handle);
+            WindowManager.GL.DeleteProgram(handle);
             disposedValue = true;
         }
         GC.SuppressFinalize(this);
     }
     
-    ~Shader()
+    ~ShaderProgram()
     {
         if (!disposedValue)
         {
@@ -76,9 +79,9 @@ public class Shader : IDisposable
     }
     
 
-    public void SetColor<T>(string pName, Color4<T> pColor) where T : IColorSpace4
+    public void SetColor(string pName, Color pColor)
     {
-        GL.Uniform4f(GetUniformLocation(pName), pColor.X, pColor.Y, pColor.Z, pColor.W);
+        WindowManager.GL.Uniform4(GetUniformLocation(pName), pColor.R, pColor.G, pColor.B, pColor.A);
     }
 
     private int GetUniformLocation(string pName)
@@ -88,7 +91,7 @@ public class Shader : IDisposable
             return pValue;
         }
         
-        int value = GL.GetUniformLocation(handle, pName);
+        int value = WindowManager.GL.GetUniformLocation(handle, pName);
         if (value == -1)
         {
             throw new Exception($"Couldn't find uniform with name: {pName}!");

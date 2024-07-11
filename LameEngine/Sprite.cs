@@ -1,10 +1,8 @@
-﻿using OpenTK.Mathematics;
-
-namespace LameEngine;
+﻿namespace LameEngine;
 
 public struct SpriteSettings()
 {
-    public Color4<Rgba> Color = Color4.White;
+    public Color Color = Color.White;
     public Texture.Settings TextureSettings = new Texture.Settings();
 }
 
