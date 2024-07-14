@@ -1,16 +1,50 @@
-﻿using Silk.NET.OpenGL;
+﻿using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace LameEngine;
 
-public static class Rectangle
+public class Rectangle
 {
     private static uint vao;
     private static ShaderProgram shaderProgram;
+    private static GL gl;
 
-    private static GL GL = WindowManager.GL;
-
-    public static void Initialize()
+    public struct RenderSettings()
     {
+        public Matrix4X4<float> ModelMatrix = Matrix4X4<float>.Identity;
+        public Color Color = Color.White;
+    }
+   
+    public static void Draw(RenderSettings pRenderSettings)
+    {
+        shaderProgram.Use();
+        InternalDraw(pRenderSettings);
+    }
+
+    public static void Draw(RenderSettings pRenderSettings, Texture pTexture)
+    {
+        shaderProgram.Use();
+        pTexture.Use();
+        InternalDraw(pRenderSettings);
+    }
+    
+    private static void InternalDraw(RenderSettings pRenderSettings)
+    {
+        Matrix4X4<float> newModel = pRenderSettings.ModelMatrix;
+        Matrix4X4<float> projection = Engine.I.ProjectionMatrix;
+        
+        shaderProgram.SetColor("spriteColor", pRenderSettings.Color);
+        shaderProgram.SetMatrix4X4("modelMatrix", newModel);
+        shaderProgram.SetMatrix4X4("projectionMatrix", projection);
+        
+        gl.BindVertexArray(vao);
+        gl.DrawArrays(PrimitiveType.Triangles, 0, 6);
+        gl.UseProgram(0);
+    }
+    
+    internal static void Initialize(GL pGL)
+    {
+        gl = pGL;
         shaderProgram = new ShaderProgram("Resources/Shaders/Rectangle.vert", "Resources/Shaders/Rectangle.frag");
 
         float[] vertices =
@@ -19,65 +53,51 @@ public static class Rectangle
             -0.5f, 0.5f, 0.0f, 1.0f,
             0.5f, -0.5f, 1.0f, 0.0f,
             -0.5f, -0.5f, 0.0f, 0.0f,
-
+            
             -0.5f, 0.5f, 0.0f, 1.0f,
             0.5f, 0.5f, 1.0f, 1.0f,
             0.5f, -0.5f, 1.0f, 0.0f,
+            
+            
+            // -1.0f, 1.0f, 0.0f, 1.0f,
+            // 1.0f, -1.0f, 1.0f, 0.0f,
+            // -1.0f, -1.0f, 0.0f, 0.0f,
+            //
+            // -1.0f, 1.0f, 0.0f, 1.0f,
+            // 1.0f, 1.0f, 1.0f, 1.0f,
+            // 1.0f, -1.0f, 1.0f, 0.0f,
+            
+            // -1.0f, 1.0f, 0.0f, 1.0f,
+            // 0.0f, 0.0f, 1.0f, 0.0f,
+            // -1.0f, 0.0f, 0.0f, 0.0f, 
+            //
+            // -1.0f, 1.0f, 0.0f, 1.0f,
+            // 0.0f, 1.0f, 1.0f, 1.0f,
+            // 0.0f, 0.0f, 1.0f, 0.0f,
         };
 
+        uint vbo = gl.GenBuffer();
+        vao = gl.GenVertexArray();
 
-        uint vbo = GL.GenBuffer();
-        vao = GL.GenVertexArray();
-
-        GL.BindVertexArray(vao);
-        GL.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
+        gl.BindVertexArray(vao);
+        gl.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 
         Span<float> v = new Span<float>(vertices);
 
-        GL.BufferData(
+        gl.BufferData(
             BufferTargetARB.ArrayBuffer,
             (uint)vertices.Length * sizeof(float),
             v.GetPinnableReference(),
             BufferUsageARB.StaticDraw
         );
 
-        GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
-        GL.EnableVertexAttribArray(0);
+        gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 0);
+        gl.EnableVertexAttribArray(0);
 
-        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 2 * sizeof(float));
-        GL.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 4 * sizeof(float), 2 * sizeof(float));
+        gl.EnableVertexAttribArray(1);
 
-        GL.BindVertexArray(0);
-        GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
-    }
-
-    public static void Draw(Color pColor)
-    {
-        shaderProgram.Use();
-        shaderProgram.SetColor("spriteColor", pColor);
-        InternalDraw(pColor);
-    }
-
-    public static void Draw(Texture pTexture)
-    {
-        shaderProgram.Use();
-        pTexture.Use();
-        InternalDraw(Color.White);
-    }
-
-    public static void Draw(Texture pTexture, Color pColor)
-    {
-        shaderProgram.Use();
-        pTexture.Use();
-        InternalDraw(pColor);
-    }
-
-    private static void InternalDraw(Color pColor)
-    {
-        shaderProgram.SetColor("spriteColor", pColor);
-
-        GL.BindVertexArray(vao);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-        GL.UseProgram(0);
+        gl.BindVertexArray(0);
+        gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
     }
 }

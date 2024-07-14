@@ -1,28 +1,47 @@
 ﻿using Silk.NET.Input;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using static Silk.NET.Windowing.Window;
 
 namespace LameEngine;
 
-public static class WindowManager
-{        
-    public static GL GL;
-    public static IWindow MainWindow { get; private set; }
-    public static IInputContext InputContext;
+public class WindowManager
+{
+    public IWindow MainWindow { get; private set; }
+    public float DeltaTime { get; private set; }
 
-    private static readonly List<IWindow> additionalWindows = new List<IWindow>();
-    
-    public static void CreateMainWindow(WindowOptions pMainWindowOptions)
+    private readonly List<IWindow> additionalWindows = new List<IWindow>();
+    private readonly GL gl;
+    private readonly Engine engine;
+    private readonly ShaderProgram shaderProgram;
+
+    private double lastTime;
+
+
+    public WindowManager(WindowOptions pMainWindowOptions, out GL pGL, out IInputContext pInputContext)
     {
         MainWindow = Create(pMainWindowOptions);
         MainWindow.Initialize();
-        InputContext = MainWindow.CreateInput();
+        MainWindow.Resize += OnMainWindowResize;
 
-        GL = GL.GetApi(MainWindow.GLContext);
+        gl = GL.GetApi(MainWindow.GLContext);
+
+        pGL = gl;
+        pInputContext = MainWindow.CreateInput();
+        
+        engine = Engine.I;
+
+        ShaderProgram.Initialize(gl);
+        shaderProgram = new ShaderProgram("Resources/Shaders/Screen.vert", "Resources/Shaders/Screen.frag");
     }
 
-    public static IWindow CreateWindow(WindowOptions pMainWindowOptions)
+    private void OnMainWindowResize(Vector2D<int> pNewSize)
+    {
+        gl.Viewport(pNewSize);
+    }
+
+    public IWindow CreateWindow(WindowOptions pMainWindowOptions)
     {
         IWindow window = Create(pMainWindowOptions);
         additionalWindows.Add(window);
@@ -30,7 +49,7 @@ public static class WindowManager
         return window;
     }
 
-    public static void CloseWindow(IWindow pWindow)
+    public void CloseWindow(IWindow pWindow)
     {
         for (int i = additionalWindows.Count - 1; i >= 0; i--)
         {
@@ -44,7 +63,7 @@ public static class WindowManager
         }
     }
 
-    public static void CloseAllAdditionalWindows()
+    public void CloseAllAdditionalWindows()
     {
         for (int i = additionalWindows.Count - 1; i >= 0; i--)
         {
@@ -53,14 +72,34 @@ public static class WindowManager
             additionalWindows.RemoveAt(i);
         }
     }
-    
-    public static void Run()
+
+    public void Run()
     {
+        FrameBuffer frameBuffer = new FrameBuffer(MainWindow.Size);
+        MainWindow.Resize += frameBuffer.Resize;
+
+
         while (!MainWindow.IsClosing)
         {
             MainWindow.DoEvents();
-            MainWindow.DoUpdate();
+
+            DeltaTime = (float)(MainWindow.Time - lastTime);
+            lastTime = MainWindow.Time;
+
+            engine.InternalUpdate();
+
+            frameBuffer.Bind();
+            engine.InternalRender();
+
+            gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            gl.Clear(ClearBufferMask.ColorBufferBit);
+
+            shaderProgram.Use();
+            frameBuffer.Draw();
+
+            MainWindow.SwapBuffers();
             MainWindow.DoRender();
+
 
             foreach (IWindow? window in additionalWindows)
             {

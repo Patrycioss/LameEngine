@@ -1,4 +1,6 @@
-﻿using Silk.NET.OpenGL;
+﻿using System.Numerics;
+using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 
 namespace LameEngine;
 
@@ -8,62 +10,61 @@ public class ShaderProgram : IDisposable
     private bool disposedValue = false;
     private readonly Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
 
+    private static GL gl;
 
     public ShaderProgram(string pVertexPath, string pFragmentPath)
     {
-        GL GL = WindowManager.GL;
-
         string vertexSource = File.ReadAllText(pVertexPath);
         string fragmentSource = File.ReadAllText(pFragmentPath);
 
-        uint vertexShader = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertexShader, vertexSource);
+        uint vertexShader = gl.CreateShader(ShaderType.VertexShader);
+        gl.ShaderSource(vertexShader, vertexSource);
 
-        uint fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragmentShader, fragmentSource);
+        uint fragmentShader = gl.CreateShader(ShaderType.FragmentShader);
+        gl.ShaderSource(fragmentShader, fragmentSource);
 
-        GL.CompileShader(vertexShader);
+        gl.CompileShader(vertexShader);
 
         {
-            string info = GL.GetShaderInfoLog(vertexShader);
+            string info = gl.GetShaderInfoLog(vertexShader);
             Console.WriteLine(info);
         }
 
-        GL.CompileShader(fragmentShader);
+        gl.CompileShader(fragmentShader);
 
         {
-            string info = GL.GetShaderInfoLog(fragmentShader);
+            string info = gl.GetShaderInfoLog(fragmentShader);
             Console.WriteLine(info);
         }
 
-        handle = GL.CreateProgram();
+        handle = gl.CreateProgram();
 
-        GL.AttachShader(handle, vertexShader);
-        GL.AttachShader(handle, fragmentShader);
+        gl.AttachShader(handle, vertexShader);
+        gl.AttachShader(handle, fragmentShader);
 
-        GL.LinkProgram(handle);
+        gl.LinkProgram(handle);
 
         {
-            string info = GL.GetProgramInfoLog(handle);
+            string info = gl.GetProgramInfoLog(handle);
             Console.WriteLine(info);
         }
 
-        GL.DetachShader(handle, vertexShader);
-        GL.DetachShader(handle, fragmentShader);
-        GL.DeleteShader(fragmentShader);
-        GL.DeleteShader(vertexShader);
+        gl.DetachShader(handle, vertexShader);
+        gl.DetachShader(handle, fragmentShader);
+        gl.DeleteShader(fragmentShader);
+        gl.DeleteShader(vertexShader);
     }
 
     public void Use()
     {
-        WindowManager.GL.UseProgram(handle);
+        gl.UseProgram(handle);
     }
 
     public void Dispose()
     {
         if (!disposedValue)
         {
-            WindowManager.GL.DeleteProgram(handle);
+            gl.DeleteProgram(handle);
             disposedValue = true;
         }
 
@@ -81,7 +82,17 @@ public class ShaderProgram : IDisposable
 
     public void SetColor(string pName, Color pColor)
     {
-        WindowManager.GL.Uniform4(GetUniformLocation(pName), pColor.R, pColor.G, pColor.B, pColor.A);
+        gl.Uniform4(GetUniformLocation(pName), pColor.R, pColor.G, pColor.B, pColor.A);
+    }
+
+    public unsafe void SetMatrix4X4(string pName, Matrix4X4<float> pMatrix)
+    {
+        gl.UniformMatrix4(GetUniformLocation(pName), 1, false, (float*)&pMatrix);
+    }
+
+    public unsafe void SetMatrix4X4(string pName, Matrix4x4 pMatrix)
+    {
+        gl.UniformMatrix4(GetUniformLocation(pName), 1, false, (float*)&pMatrix);
     }
 
     private int GetUniformLocation(string pName)
@@ -91,12 +102,19 @@ public class ShaderProgram : IDisposable
             return pValue;
         }
 
-        int value = WindowManager.GL.GetUniformLocation(handle, pName);
+        int value = gl.GetUniformLocation(handle, pName);
         if (value == -1)
         {
             throw new Exception($"Couldn't find uniform with name: {pName}!");
         }
 
+        uniformLocations.Add(pName, value);
+
         return value;
+    }
+
+    internal static void Initialize(GL pGL)
+    {
+        gl = pGL;
     }
 }

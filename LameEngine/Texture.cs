@@ -17,33 +17,33 @@ public class Texture
         public TextureMagFilter MipMapMagFilter = TextureMagFilter.Linear;
     }
 
+    public readonly int Width;
+    public readonly int Height;
+    
     private readonly uint handle;
-    private static GL GL = WindowManager.GL;
-
-
-    static Texture()
-    {
-        StbImage.stbi_set_flip_vertically_on_load(1);
-    }
+    private static GL gl;
 
     public Texture(string pImagePath, Settings pSettings = default)
     {
-        handle = GL.GenTexture();
+        handle = gl.GenTexture();
 
         Use();
 
         // Texture wrapping
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)pSettings.WrapSMode);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)pSettings.WrapTMode);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)pSettings.WrapSMode);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)pSettings.WrapTMode);
 
         // Texture filtering
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)pSettings.MinFilter);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)pSettings.MagFilter);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)pSettings.MinFilter);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)pSettings.MagFilter);
 
         ImageResult image = ImageResult.FromStream(File.OpenRead(pImagePath), ColorComponents.RedGreenBlueAlpha);
         Span<byte> data = new Span<byte>(image.Data);
 
-        GL.TexImage2D(
+        Width = image.Width;
+        Height = image.Height;
+
+        gl.TexImage2D(
             TextureTarget.Texture2D,
             pSettings.LevelOfDetail,
             InternalFormat.Rgba,
@@ -55,23 +55,29 @@ public class Texture
             data.GetPinnableReference()
         );
 
-        GL.TexParameter(
+        gl.TexParameter(
             TextureTarget.Texture2D,
             TextureParameterName.TextureMinFilter,
             (int)pSettings.MipMapMinFilter
         );
-        
-        GL.TexParameter(
+
+        gl.TexParameter(
             TextureTarget.Texture2D,
             TextureParameterName.TextureMagFilter,
             (int)pSettings.MipMapMagFilter
         );
-   
-        GL.GenerateMipmap(TextureTarget.Texture2D);
+
+        gl.GenerateMipmap(TextureTarget.Texture2D);
     }
 
     public void Use()
     {
-        GL.BindTexture(TextureTarget.Texture2D, handle);
+        gl.BindTexture(TextureTarget.Texture2D, handle);
+    }
+    
+    internal static void Initialize(GL pGL)
+    {
+        gl = pGL;
+        StbImage.stbi_set_flip_vertically_on_load(1);
     }
 }

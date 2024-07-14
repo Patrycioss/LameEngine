@@ -1,18 +1,38 @@
-﻿namespace LameEngine;
+﻿using System.Diagnostics;
+
+namespace LameEngine;
 
 public abstract class Component
 {
-    public override int GetHashCode()
-    {
-        return GetType().GetHashCode();
-    }
+    protected GameObject gameObject;
+    protected Transform transform;
 
+    protected Component()
+    {
+       
+        
+        // gameObject = gameObject;
+        // transform = gameObject.Transform;
+    }
+    
+    protected virtual void Start()
+    {
+        
+    }
+    
     protected virtual void Update()
     {
     }
 
     protected virtual void Render()
     {
+    }
+
+    internal void InternalStart(GameObject pGameObject, Transform pTransform)
+    {
+        gameObject = pGameObject;
+        transform = pTransform;
+        Start();
     }
 
     internal void InternalUpdate()
@@ -23,6 +43,11 @@ public abstract class Component
     internal void InternalRender()
     {
         Render();
+    }
+
+    public override int GetHashCode()
+    {
+        return GetType().GetHashCode();
     }
 
     public static bool operator ==(Component pFirst, Component pSecond)

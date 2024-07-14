@@ -2,6 +2,13 @@
 
 public class GameTemplate
 {
+    protected readonly Engine engine;
+    
+    protected GameTemplate()
+    {
+        engine = Engine.I;
+    }
+    
     public virtual void Load()
     {
     }

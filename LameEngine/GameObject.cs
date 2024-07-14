@@ -1,37 +1,32 @@
-﻿using System.Reflection;
+﻿using Silk.NET.Maths;
 
 namespace LameEngine;
 
 public class GameObject
 {
     private readonly HashSet<Component> components = new HashSet<Component>();
-
-    private static MethodInfo? registerMethod = null;
-    private static bool registerMethodFound = false;
-
-    public GameObject()
-    {
-        if (!registerMethodFound)
-        {
-            Type engineType = typeof(Engine);
-            registerMethod = engineType.GetMethod("RegisterObject", BindingFlags.Static | BindingFlags.NonPublic);
-            if (registerMethod == null)
-            {
-                throw new Exception($"Can't find register method in {nameof(Engine)} class!");
-            }
-
-            registerMethodFound = true;
-        }
-
-        registerMethod?.Invoke(null, new object?[] { this });
-    }
+    public Transform Transform { get; private set; }
     
-  
+    protected Engine Engine { get; private set; }
+
+    public GameObject(Vector2D<float> pPosition, float pAngle = 0)
+    {
+        Transform = new Transform(pPosition, pAngle);
+        Engine = Engine.I;
+        Engine.RegisterObject(this);
+    }
+
+    public GameObject(Vector2D<float> pPosition, Vector2D<float> pScale, float pAngle = 0)
+    {
+        Transform = new Transform(pPosition, pScale, pAngle);
+        Engine.RegisterObject(this);
+    }
     
     public T AddComponent<T>(T pComponent) where T : Component
     {
         if (components.Add(pComponent))
         {
+            pComponent.InternalStart(this, Transform);
             return pComponent;
         }
 
@@ -79,6 +74,8 @@ public class GameObject
         }
         
         Update();
+        
+        Transform.Clean();
     }
 
     internal void InternalRender()
