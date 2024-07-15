@@ -7,19 +7,25 @@ using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace LameEngine;
 
-public struct WindowSettings
+public class WindowSettings
 {
     public Vector2D<int> Resolution;
-    public float NearPlane = -1.0f;
-    public float FarPlane = 1.0f;
-    public float Zoom = 1.0f;
-    public string ScreenVertexPath = "EngineResources/Shaders/Screen.vert";
-    public string ScreenFragmentPath = "EngineResources/Shaders/Screen.frag";
-    public Color BackgroundColor = Color.Blue;
+    public float NearPlane;
+    public float FarPlane;
+    public float Zoom;
+    public string ScreenVertexPath;
+    public string ScreenFragmentPath;
+    public Color BackgroundColor;
 
     public WindowSettings(Vector2D<int> pResolution)
     {
         Resolution = pResolution;
+        NearPlane = -1.0f;
+        FarPlane = 1.0f;
+        Zoom = 1.0f;
+        ScreenVertexPath = "EngineResources/Shaders/Screen.vert";
+        ScreenFragmentPath = "EngineResources/Shaders/Screen.frag";
+        BackgroundColor = Color.Blue;
     }
 
     public Matrix4X4<float> CalculateProjectionMatrix()

@@ -22,10 +22,4 @@ public class Game : GameTemplate
         TestObject object1 = new TestObject(side, 200);
         TestObject object2 = new TestObject(Engine.MainWindow, 200);
     }
-
-    public override void Load()
-    {
-    }
-
-    private const float SPEED = 200;
 }
