@@ -11,11 +11,15 @@ namespace TestGame
             WindowOptions windowOptions = WindowOptions.Default;
             windowOptions.Size = new Vector2D<int>(400, 400);
             windowOptions.TopMost = true;
-            
-            // windowOptions.WindowBorder = WindowBorder.Hidden;
-            // windowOptions.TransparentFramebuffer = true;
+            // WindowBorder = WindowBorder.Hidden,
+            // TransparentFramebuffer = true,
 
-            Engine engine = new Engine(windowOptions);
+            WindowSettings windowSettings = new WindowSettings(new Vector2D<int>(400, 400));
+            
+            
+        
+
+            Engine engine = new Engine(windowOptions, windowSettings);
             engine.Run(new Game());
         }
     }

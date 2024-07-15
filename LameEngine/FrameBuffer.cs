@@ -5,14 +5,42 @@ namespace LameEngine;
 
 public class FrameBuffer
 {
-    private static GL gl;
-    private static uint quadVAO;
+    private readonly GL gl;
+    private readonly uint quadVAO;
 
     private readonly uint fbo;
     private readonly uint textureColorBuffer;
 
-    public FrameBuffer(Vector2D<int> pSize)
+    public FrameBuffer(GL pGL,Vector2D<int> pSize)
     {
+        gl = pGL;
+        
+        float[] quadVertices =
+        {
+            // positions   // texCoords
+            -1.0f, 1.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f,
+            1.0f, -1.0f, 1.0f, 0.0f,
+
+            -1.0f, 1.0f, 0.0f, 1.0f,
+            1.0f, -1.0f, 1.0f, 0.0f,
+            1.0f, 1.0f, 1.0f, 1.0f,
+        };
+
+        quadVAO = gl.GenVertexArray();
+        uint vbo = gl.GenBuffer();
+
+        gl.BindVertexArray(quadVAO);
+        gl.BindBuffer(GLEnum.ArrayBuffer, vbo);
+
+        ReadOnlySpan<float> bufferData = new ReadOnlySpan<float>(quadVertices);
+        gl.BufferData(GLEnum.ArrayBuffer, bufferData, BufferUsageARB.StaticDraw);
+
+        gl.EnableVertexAttribArray(0);
+        gl.VertexAttribPointer(0, 2, GLEnum.Float, false, 4 * sizeof(float), 0);
+        gl.EnableVertexAttribArray(1);
+        gl.VertexAttribPointer(1, 2, GLEnum.Float, false, 4 * sizeof(float), 2 * sizeof(float));
+        
         fbo = gl.GenFramebuffer();
         gl.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 
@@ -63,37 +91,6 @@ public class FrameBuffer
         gl.BindVertexArray(quadVAO);
         gl.BindTexture(TextureTarget.Texture2D, textureColorBuffer);
         gl.DrawArrays(PrimitiveType.Triangles, 0, 6);
-    }
-
-    internal static void Initialize(GL pGL)
-    {
-        gl = pGL;
-
-        float[] quadVertices =
-        {
-            // positions   // texCoords
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            -1.0f, -1.0f, 0.0f, 0.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
-
-            -1.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, -1.0f, 1.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-        };
-
-        quadVAO = gl.GenVertexArray();
-        uint vbo = gl.GenBuffer();
-
-        gl.BindVertexArray(quadVAO);
-        gl.BindBuffer(GLEnum.ArrayBuffer, vbo);
-
-        ReadOnlySpan<float> bufferData = new ReadOnlySpan<float>(quadVertices);
-        gl.BufferData(GLEnum.ArrayBuffer, bufferData, BufferUsageARB.StaticDraw);
-
-        gl.EnableVertexAttribArray(0);
-        gl.VertexAttribPointer(0, 2, GLEnum.Float, false, 4 * sizeof(float), 0);
-        gl.EnableVertexAttribArray(1);
-        gl.VertexAttribPointer(1, 2, GLEnum.Float, false, 4 * sizeof(float), 2 * sizeof(float));
     }
 
     ~FrameBuffer()

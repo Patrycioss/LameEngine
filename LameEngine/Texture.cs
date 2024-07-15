@@ -19,12 +19,15 @@ public class Texture
 
     public readonly int Width;
     public readonly int Height;
-    
-    private readonly uint handle;
-    private static GL gl;
 
-    public Texture(string pImagePath, Settings pSettings = default)
+    private readonly uint handle;
+    private readonly GL gl;
+
+    public Texture(Window pTarget, string pImagePath, Settings pSettings = default)
     {
+        gl = pTarget.GL;
+        StbImage.stbi_set_flip_vertically_on_load(0);
+
         handle = gl.GenTexture();
 
         Use();
@@ -73,11 +76,5 @@ public class Texture
     public void Use()
     {
         gl.BindTexture(TextureTarget.Texture2D, handle);
-    }
-    
-    internal static void Initialize(GL pGL)
-    {
-        gl = pGL;
-        StbImage.stbi_set_flip_vertically_on_load(1);
     }
 }

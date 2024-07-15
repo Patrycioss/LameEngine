@@ -2,76 +2,70 @@
 
 namespace LameEngine;
 
-public struct SpriteSettings()
+public class SpriteSettings
 {
-    public Color Color = Color.White;
-    public Texture.Settings TextureSettings = new Texture.Settings();
-    public Vector2D<int> Resolution = new Vector2D<int>(-1, -1);
+    public Matrix4X4<float> ModelMatrix;
+    public Color Color;
+    public Texture.Settings TextureSettings;
+    public Vector2D<int> Resolution;
+    public readonly string TexturePath;
+    
+    public SpriteSettings(string pTexturePath)
+    {
+        ModelMatrix = Matrix4X4<float>.Identity;
+        Color = Color.White;
+        TextureSettings = new Texture.Settings();
+        Resolution = new Vector2D<int>(-1, -1);
+        TexturePath = pTexturePath;
+    }
+
+    public void ReCalculateModelMatrix(Transform pTransform)
+    {
+        ReCalculateModelMatrix(pTransform.Angle, pTransform.Scale, pTransform.Position);
+    }
+
+    public void ReCalculateModelMatrix(float pRotation, Vector2D<float> pScale, Vector2D<float> pTranslation)
+    {
+        Matrix4X4<float> modelMatrix = Matrix4X4<float>.Identity;
+        Matrix4X4<float> rotationMatrix = Matrix4X4.CreateFromAxisAngle(new Vector3D<float>(0, 0, 1), pRotation);
+        Matrix4X4<float> scaleMatrix =
+            Matrix4X4.CreateScale(Resolution.X * pScale.X, Resolution.Y * pScale.Y, 1);
+        Matrix4X4<float> translationMatrix = Matrix4X4.CreateTranslation(pTranslation.X, pTranslation.Y, 0);
+
+        ModelMatrix = modelMatrix * rotationMatrix * scaleMatrix * translationMatrix;
+    }
+
+    public override string ToString()
+    {
+        return
+            $"[ModelMatrix: {ModelMatrix}, Color: {Color}, Settings: {TextureSettings}, Resolution: {Resolution}, TexturePath: {TexturePath}";
+    }
 }
 
 public class Sprite : Component
 {
-    private Rectangle.RenderSettings renderSettings;
-    private readonly Texture texture;
-    private Vector2D<int> resolution;
+    private SpriteSettings spriteSettings;
 
-    public Sprite(string pPath)
+    public Sprite(SpriteSettings pSpriteSettings)
     {
-        texture = AssetManager.LoadTexture(pPath, new Texture.Settings());
-        renderSettings = new Rectangle.RenderSettings();
-        resolution = new Vector2D<int>(texture.Width, texture.Height);
-    }
-
-    public Sprite(string pPath, SpriteSettings pSpriteSettings)
-    {
-        texture = AssetManager.LoadTexture(pPath, pSpriteSettings.TextureSettings);
-        renderSettings = new Rectangle.RenderSettings()
-        {
-            Color = pSpriteSettings.Color,
-        };
-        resolution = pSpriteSettings.Resolution;
+        spriteSettings = pSpriteSettings;
     }
 
     protected override void Start()
     {
-        ReCalculateModelMatrix();
+        spriteSettings.ReCalculateModelMatrix(transform);
     }
 
     protected override void Update()
     {
         if (transform.Dirty)
         {
-            ReCalculateModelMatrix();
+            spriteSettings.ReCalculateModelMatrix(gameObject.Transform);
         }
     }
 
     protected override void Render()
     {
-        Rectangle.Draw(renderSettings, texture);
-    }
-
-    // Matrix4X4<float> modelMatrix = Matrix4X4<float>.Identity;
-    // Matrix4X4<float> rotationMatrix = Matrix4X4.CreateFromAxisAngle(new Vector3D<float>(0, 0, 1), Angle);
-    // Matrix4X4<float> scaleMatrix = Matrix4X4.CreateScale(Scale.X, Scale.Y, 1);
-    // Matrix4X4<float> translationMatrix = Matrix4X4.CreateTranslation(Position.X, Position.Y, 0);
-
-    // modelMatrix * translationMatrix * rotationMatrix * scaleMatrix;
-
-    private void ReCalculateModelMatrix()
-    {
-        // Console.WriteLine($"Scale: {spriteTransform.TransformData.Scale}");
-
-        Matrix4X4<float> modelMatrix = Matrix4X4<float>.Identity;
-        Matrix4X4<float> rotationMatrix = Matrix4X4.CreateFromAxisAngle(new Vector3D<float>(0, 0, 1), transform.Angle);
-        Matrix4X4<float> scaleMatrix =
-            Matrix4X4.CreateScale(resolution.X * transform.Scale.X, resolution.Y * transform.Scale.Y, 1);
-        Matrix4X4<float> translationMatrix = Matrix4X4.CreateTranslation(transform.Position.X, transform.Position.Y, 0);
-
-
-        renderSettings.ModelMatrix = modelMatrix * rotationMatrix * scaleMatrix * translationMatrix;
-        // Console.WriteLine($"{renderSettings.ModelMatrix.Row1}");
-        // Console.WriteLine($"{renderSettings.ModelMatrix.Row2}");
-        // Console.WriteLine($"{renderSettings.ModelMatrix.Row3}");
-        // Console.WriteLine($"{renderSettings.ModelMatrix.Row4}");
+        Draw.DrawSprite(gameObject.Target, spriteSettings);
     }
 }

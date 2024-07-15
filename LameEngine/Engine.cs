@@ -1,7 +1,5 @@
-﻿using Silk.NET.Input;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using Silk.NET.Windowing;
+﻿using Silk.NET.Windowing;
+using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace LameEngine;
 
@@ -9,114 +7,75 @@ public class Engine
 {
     public static Engine I { get; private set; }
     
-    public Vector2D<int> Resolution { get; private set; }
-    public WindowManager WindowManager { get; private set; }
-    public IInputContext InputContext { get; private set; }
-    public GL GL { get; private set; }
+    public Window MainWindow => windows[0];
+    public float DeltaTime { get; private set; }
 
+    private readonly List<Window> windows = new List<Window>();
     private GameTemplate? gameTemplate;
 
+    private double lastTime;
 
-    private readonly List<GameObject> gameObjects = new List<GameObject>();
-
-    internal Matrix4X4<float> ProjectionMatrix = Matrix4X4<float>.Identity;
-    
-
-    public Engine(WindowOptions pWindowOptions)
+    public Engine(WindowOptions pWindowOptions, WindowSettings pWindowSettings)
     {
-        // if (I != null)
-        // {
-        //     throw new Exception("There can't be more than one active Engine!");
-        // }
-        
         I = this;
-
-
-        WindowManager = new WindowManager(pWindowOptions, out GL gl, out IInputContext inputContext);
-        GL = gl;
-        InputContext = inputContext;
         
-        FrameBuffer.Initialize(GL);
-        ShaderProgram.Initialize(GL);
-        Texture.Initialize(GL);
-        Rectangle.Initialize(GL);
-        
-        SetResolution(pWindowOptions.Size);
+        // Prioritize GLFW as it plays better with multiple windows and input.
+        SilkWindow.PrioritizeGlfw();
+
+        CreateWindow(pWindowOptions, pWindowSettings);
+    }
+    
+    public Window CreateWindow(WindowOptions pWindowOptions, WindowSettings pWindowSettings)
+    {
+        pWindowOptions.IsEventDriven = false;
+        pWindowOptions.ShouldSwapAutomatically = false;
+        pWindowOptions.VideoMode = new VideoMode(pWindowSettings.Resolution);
+        Window window = new Window(pWindowOptions, pWindowSettings);
+        windows.Add(window);
+        return window;
+    }
+
+    public void CloseWindow(Window pWindow)
+    {
+        for (int i = windows.Count - 1; i >= 0; i--)
+        {
+            int index = windows.IndexOf(pWindow);
+            if (index != -1)
+            {
+                windows.RemoveAt(index);
+            }
+        }
+    }
+
+    public void CloseAllAdditionalWindows()
+    {
+        for (int i = windows.Count - 1; i >= 0; i--)
+        {
+            windows.RemoveAt(i);
+        }
     }
 
     public void Run(GameTemplate pGameTemplate)
     {
         gameTemplate = pGameTemplate;
-        Load();
-        WindowManager.Run();
-    }
-
-    internal void RegisterObject(GameObject pGameObject)
-    {
-        gameObjects.Add(pGameObject);
-    }
-
-    private void Load()
-    {
         gameTemplate!.Load();
-    }
-
-    internal void InternalUpdate()
-    {
-        foreach (GameObject gameObject in gameObjects)
-        {
-            gameObject.InternalUpdate();
-        }
-
-        gameTemplate!.Update();
-    }
-
-    internal void InternalRender()
-    {
-        GL.ClearColor(0.39f, 0.58f, 0.93f, 1.0f);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
-
-        foreach (GameObject gameObject in gameObjects)
-        {
-            gameObject.InternalRender();
-        }
-
-        gameTemplate!.Render();
-    }
-
-    public void SetResolution(Vector2D<int> pResolution)
-    {
-        Resolution = pResolution;
         
-        // float left = 0;
-        // float right = pResolution.X;
-        // float bottom = pResolution.Y;
-        // float top = 0;
-        //
-        // float farPlane = 1.0f;
-        // float nearPlane = -1.0f;
-        //
-        // Matrix4X4<float> matrix = new Matrix4X4<float>();
-        // matrix.M11 = 2.0f / (right - left);
-        // matrix.M22 = 2.0f / (top - bottom);
-        // matrix.M33 = -2.0f / (farPlane - nearPlane);
-        // matrix.M41 = -(right + left) / (right - left);
-        // matrix.M42 = -(top + bottom) / (top - bottom);
-        // matrix.M43 = -(farPlane + nearPlane) / (farPlane - nearPlane);
-        // matrix.M44 = 1.0f;
+        while (!MainWindow.Handle.IsClosing)
+        {
+            foreach (Window window in windows)
+            {
+                window.Handle.DoEvents();
+            }
+            
+            gameTemplate!.Update();
+            
+            DeltaTime = (float)(MainWindow.Handle.Time - lastTime);
+            lastTime = MainWindow.Handle.Time;
 
-        Matrix4X4<float> orthographic =
-        Matrix4X4.CreateOrthographicOffCenter(0, pResolution.X, pResolution.Y, 0, -1.0f, 1.0f);
-        Matrix4X4<float> zoom = Matrix4X4.CreateScale(new Vector3D<float>(1,-1, 1));
-        zoom.LogMatrix("zoom");
-        //
-        //
-        //
-        ProjectionMatrix = orthographic * zoom;
-
-        // ProjectionMatrix = matrix;
-
-        // ProjectionMatrix = ;
-        ProjectionMatrix.LogMatrix("Projection");
+            foreach (Window window in windows)
+            {
+                window.Process();
+            }
+        }
     }
 }

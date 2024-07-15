@@ -6,20 +6,26 @@ public class GameObject
 {
     private readonly HashSet<Component> components = new HashSet<Component>();
     public Transform Transform { get; private set; }
+    public Window Target { get; private set; }
     
     protected Engine Engine { get; private set; }
 
-    public GameObject(Vector2D<float> pPosition, float pAngle = 0)
+    public GameObject(Vector2D<float> pPosition, float pAngle = 0, Window? pTarget = null)
     {
         Transform = new Transform(pPosition, pAngle);
         Engine = Engine.I;
-        Engine.RegisterObject(this);
+        
+        Target = Engine.MainWindow;
+        Target = pTarget ?? Engine.MainWindow;
+        Target.AddObject(this);
     }
 
-    public GameObject(Vector2D<float> pPosition, Vector2D<float> pScale, float pAngle = 0)
+    public GameObject(Vector2D<float> pPosition, Vector2D<float> pScale, float pAngle = 0, Window? pTarget = null)
     {
         Transform = new Transform(pPosition, pScale, pAngle);
-        Engine.RegisterObject(this);
+        Engine = Engine.I;
+        Target = pTarget ?? Engine.MainWindow;
+        Target.AddObject(this);
     }
     
     public T AddComponent<T>(T pComponent) where T : Component
@@ -68,12 +74,12 @@ public class GameObject
 
     internal void InternalUpdate()
     {
+        Update();
+        
         foreach (Component component in components)
         {
             component.InternalUpdate();
         }
-        
-        Update();
         
         Transform.Clean();
     }

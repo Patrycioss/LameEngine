@@ -2,11 +2,11 @@
 
 public class GameTemplate
 {
-    protected readonly Engine engine;
+    protected readonly Engine Engine;
     
     protected GameTemplate()
     {
-        engine = Engine.I;
+        Engine = Engine.I;
     }
     
     public virtual void Load()
@@ -16,11 +16,7 @@ public class GameTemplate
     public virtual void Update()
     {
     }
-
-    public virtual void Render()
-    {
-    }
-
+    
     public virtual void Close()
     {
     }

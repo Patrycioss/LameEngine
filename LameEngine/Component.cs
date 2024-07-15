@@ -7,14 +7,6 @@ public abstract class Component
     protected GameObject gameObject;
     protected Transform transform;
 
-    protected Component()
-    {
-       
-        
-        // gameObject = gameObject;
-        // transform = gameObject.Transform;
-    }
-    
     protected virtual void Start()
     {
         

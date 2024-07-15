@@ -10,10 +10,12 @@ public class ShaderProgram : IDisposable
     private bool disposedValue = false;
     private readonly Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
 
-    private static GL gl;
+    private readonly GL gl;
 
-    public ShaderProgram(string pVertexPath, string pFragmentPath)
+    public ShaderProgram(GL pGL, string pVertexPath, string pFragmentPath)
     {
+        gl = pGL;
+        
         string vertexSource = File.ReadAllText(pVertexPath);
         string fragmentSource = File.ReadAllText(pFragmentPath);
 
@@ -111,10 +113,5 @@ public class ShaderProgram : IDisposable
         uniformLocations.Add(pName, value);
 
         return value;
-    }
-
-    internal static void Initialize(GL pGL)
-    {
-        gl = pGL;
     }
 }
