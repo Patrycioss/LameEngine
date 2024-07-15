@@ -1,5 +1,5 @@
 # LameEngine
-A 2D game Engine written in C# using Silk.NET for windowing and bindings to OpenGL. Aims to make opening and drawing to multiple windows as easy as possible.
+A 2D game Engine written in C# using [Silk.NET](https://github.com/dotnet/Silk.NET) for windowing and bindings to OpenGL. Aims to make opening and drawing to multiple windows as easy as possible.
 
 ## Example
 ![Example](ShowCase/demo1.gif)
